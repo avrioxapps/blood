@@ -3,86 +3,161 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>অ্যাডমিন প্যানেল - প্রোফাইল এডিট</title>
+  <title>Admin Panel - প্রোফাইল ম্যানেজ</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
-    <h1 class="text-2xl font-bold text-indigo-600 mb-4">অ্যাডমিন প্যানেল</h1>
-    <form id="profileForm" class="space-y-4">
-      <div><label class="block text-sm font-medium">ইউজার নাম</label>
-        <input type="text" name="name" class="w-full border px-3 py-2 rounded" /></div>
-      <div><label class="block text-sm font-medium">ব্লাড গ্রুপ</label>
-        <input type="text" name="blood" class="w-full border px-3 py-2 rounded" /></div>
-      <div><label class="block text-sm font-medium">ঠিকানা</label>
-        <input type="text" name="address" class="w-full border px-3 py-2 rounded" /></div>
-      <div><label class="block text-sm font-medium">মোবাইল নাম্বার</label>
-        <input type="text" name="phone" class="w-full border px-3 py-2 rounded" /></div>
-      <div><label class="block text-sm font-medium">সর্বশেষ রক্তদানের সময় (দিন আগে)</label>
-        <input type="number" name="lastDonate" class="w-full border px-3 py-2 rounded" /></div>
-      <div><label class="block text-sm font-medium">রক্ত দিয়েছেন কি না</label>
-        <select name="status" class="w-full border px-3 py-2 rounded">
-          <option value="donated">রক্ত দিয়েছেন</option>
-          <option value="not">এখনও দেননি</option>
-        </select></div>
-      <div><label class="block text-sm font-medium">প্রোফাইল ছবি লিঙ্ক</label>
-        <input type="text" name="image" class="w-full border px-3 py-2 rounded" /></div>
-      <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">প্রোফাইল সংরক্ষণ করুন</button>
+<body class="bg-gradient-to-r from-gray-50 to-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <header class="mb-6 text-center">
+      <h1 class="text-3xl font-bold text-indigo-600 drop-shadow-sm">অ্যাডমিন প্যানেল</h1>
+      <p class="text-sm text-gray-500">এখান থেকে প্রোফাইল যোগ, পরিবর্তন বা মুছতে পারবেন।</p>
+    </header>
+
+    <!-- Form -->
+    <form id="profileForm" class="space-y-4 bg-white p-6 rounded-xl shadow">
+      <input type="hidden" id="editIndex" />
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">নাম (English)</label>
+        <input id="name" type="text" required class="w-full border px-3 py-2 rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">ঠিকানা</label>
+        <input id="address" type="text" required class="w-full border px-3 py-2 rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">মোবাইল নাম্বার</label>
+        <input id="phone" type="tel" placeholder="01XXXXXXXXX" required class="w-full border px-3 py-2 rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">ব্লাড গ্রুপ</label>
+        <select id="blood" required class="w-full border px-3 py-2 rounded-lg">
+          <option value="">Select</option>
+          <option>A+</option>
+          <option>A-</option>
+          <option>B+</option>
+          <option>B-</option>
+          <option>O+</option>
+          <option>O-</option>
+          <option>AB+</option>
+          <option>AB-</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">প্রোফাইল ছবি (URL)</label>
+        <input id="image" type="url" placeholder="https://..." class="w-full border px-3 py-2 rounded-lg" />
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">স্ট্যাটাস</label>
+        <select id="status" class="w-full border px-3 py-2 rounded-lg">
+          <option value="notdonated">এখনও দেননি</option>
+          <option value="donated">রক্তদাতা</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium">সর্বশেষ রক্ত দিয়েছেন (দিন আগে)</label>
+        <input id="lastDonate" type="number" min="0" class="w-full border px-3 py-2 rounded-lg" />
+      </div>
+
+      <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+        সংরক্ষণ করুন
+      </button>
     </form>
 
-    <h2 class="text-xl mt-6 mb-2 font-semibold">সংরক্ষিত প্রোফাইল</h2>
-    <ul id="profileList" class="space-y-2"></ul>
+    <!-- Profiles list -->
+    <h2 class="text-xl font-semibold mt-8 mb-4">প্রোফাইল তালিকা</h2>
+    <ul id="profiles" class="space-y-4"></ul>
   </div>
 
   <script>
     const form = document.getElementById('profileForm');
-    const list = document.getElementById('profileList');
+    const profilesEl = document.getElementById('profiles');
+    const editIndexEl = document.getElementById('editIndex');
 
     function loadProfiles() {
       return JSON.parse(localStorage.getItem('profiles') || '[]');
     }
-    function saveProfiles(profiles) {
-      localStorage.setItem('profiles', JSON.stringify(profiles));
+
+    function saveProfiles(data) {
+      localStorage.setItem('profiles', JSON.stringify(data));
     }
+
     function renderProfiles() {
-      list.innerHTML = "";
-      loadProfiles().forEach((p,i) => {
+      profilesEl.innerHTML = "";
+      const data = loadProfiles();
+
+      data.forEach((p, i) => {
         const li = document.createElement('li');
-        li.className = "flex items-center justify-between bg-gray-50 p-2 rounded";
-        li.innerHTML = `<span>${p.name} - ${p.blood}</span>
-        <div>
-          <button onclick="editProfile(${i})" class="text-blue-600 mr-2">Edit</button>
-          <button onclick="deleteProfile(${i})" class="text-red-600">Delete</button>
-        </div>`;
-        list.appendChild(li);
+        li.className = "bg-white shadow rounded-xl p-5 flex items-center justify-between gap-4";
+        li.innerHTML = `
+          <div class="flex items-center gap-4">
+            <img class="w-14 h-14 rounded-full object-cover ring-2 ring-indigo-300" src="${p.image || 'https://i.pravatar.cc/100'}" alt="profile" />
+            <div>
+              <h2 class="text-lg font-semibold">${p.name} <span class="text-sm text-red-600">(${p.blood})</span></h2>
+              <p class="text-sm text-gray-600">${p.address}</p>
+              <p class="text-xs text-gray-500">📞 ${p.phone}</p>
+              ${p.lastDonate ? `<p class="text-xs text-gray-400">সর্বশেষ রক্ত দিয়েছেন: ${p.lastDonate} দিন আগে</p>` : ''}
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <a href="tel:${p.phone}" class="px-3 py-1 bg-green-500 text-white rounded-lg">কল</a>
+            <button onclick="editProfile(${i})" class="px-3 py-1 bg-blue-500 text-white rounded-lg">এডিট</button>
+            <button onclick="deleteProfile(${i})" class="px-3 py-1 bg-red-500 text-white rounded-lg">ডিলিট</button>
+          </div>
+        `;
+        profilesEl.appendChild(li);
       });
     }
 
     form.addEventListener('submit', e => {
       e.preventDefault();
-      const data = Object.fromEntries(new FormData(form).entries());
-      let profiles = loadProfiles();
-      profiles.push(data);
-      saveProfiles(profiles);
+      const data = loadProfiles();
+
+      const newProfile = {
+        name: document.getElementById('name').value,
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
+        blood: document.getElementById('blood').value,
+        image: document.getElementById('image').value,
+        status: document.getElementById('status').value,
+        lastDonate: document.getElementById('lastDonate').value
+      };
+
+      const editIndex = editIndexEl.value;
+      if (editIndex) {
+        data[editIndex] = newProfile;
+        editIndexEl.value = "";
+      } else {
+        data.push(newProfile);
+      }
+
+      saveProfiles(data);
       form.reset();
       renderProfiles();
     });
 
     function editProfile(i) {
-      const profiles = loadProfiles();
-      const p = profiles[i];
-      Object.keys(p).forEach(k => {
-        if(form[k]) form[k].value = p[k];
-      });
-      profiles.splice(i,1);
-      saveProfiles(profiles);
-      renderProfiles();
+      const data = loadProfiles()[i];
+      document.getElementById('name').value = data.name;
+      document.getElementById('address').value = data.address;
+      document.getElementById('phone').value = data.phone;
+      document.getElementById('blood').value = data.blood;
+      document.getElementById('image').value = data.image;
+      document.getElementById('status').value = data.status;
+      document.getElementById('lastDonate').value = data.lastDonate;
+      editIndexEl.value = i;
     }
 
     function deleteProfile(i) {
-      let profiles = loadProfiles();
-      profiles.splice(i,1);
-      saveProfiles(profiles);
+      const data = loadProfiles();
+      data.splice(i, 1);
+      saveProfiles(data);
       renderProfiles();
     }
 
