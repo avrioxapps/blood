@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>অ্যাডমিন প্যানেল - প্রোফাইল এডিট</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
+    <h1 class="text-2xl font-bold text-indigo-600 mb-4">অ্যাডমিন প্যানেল</h1>
+    <form id="profileForm" class="space-y-4">
+      <div><label class="block text-sm font-medium">ইউজার নাম</label>
+        <input type="text" name="name" class="w-full border px-3 py-2 rounded" /></div>
+      <div><label class="block text-sm font-medium">ব্লাড গ্রুপ</label>
+        <input type="text" name="blood" class="w-full border px-3 py-2 rounded" /></div>
+      <div><label class="block text-sm font-medium">ঠিকানা</label>
+        <input type="text" name="address" class="w-full border px-3 py-2 rounded" /></div>
+      <div><label class="block text-sm font-medium">মোবাইল নাম্বার</label>
+        <input type="text" name="phone" class="w-full border px-3 py-2 rounded" /></div>
+      <div><label class="block text-sm font-medium">সর্বশেষ রক্তদানের সময় (দিন আগে)</label>
+        <input type="number" name="lastDonate" class="w-full border px-3 py-2 rounded" /></div>
+      <div><label class="block text-sm font-medium">রক্ত দিয়েছেন কি না</label>
+        <select name="status" class="w-full border px-3 py-2 rounded">
+          <option value="donated">রক্ত দিয়েছেন</option>
+          <option value="not">এখনও দেননি</option>
+        </select></div>
+      <div><label class="block text-sm font-medium">প্রোফাইল ছবি লিঙ্ক</label>
+        <input type="text" name="image" class="w-full border px-3 py-2 rounded" /></div>
+      <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">প্রোফাইল সংরক্ষণ করুন</button>
+    </form>
+
+    <h2 class="text-xl mt-6 mb-2 font-semibold">সংরক্ষিত প্রোফাইল</h2>
+    <ul id="profileList" class="space-y-2"></ul>
+  </div>
+
+  <script>
+    const form = document.getElementById('profileForm');
+    const list = document.getElementById('profileList');
+
+    function loadProfiles() {
+      return JSON.parse(localStorage.getItem('profiles') || '[]');
+    }
+    function saveProfiles(profiles) {
+      localStorage.setItem('profiles', JSON.stringify(profiles));
+    }
+    function renderProfiles() {
+      list.innerHTML = "";
+      loadProfiles().forEach((p,i) => {
+        const li = document.createElement('li');
+        li.className = "flex items-center justify-between bg-gray-50 p-2 rounded";
+        li.innerHTML = `<span>${p.name} - ${p.blood}</span>
+        <div>
+          <button onclick="editProfile(${i})" class="text-blue-600 mr-2">Edit</button>
+          <button onclick="deleteProfile(${i})" class="text-red-600">Delete</button>
+        </div>`;
+        list.appendChild(li);
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      let profiles = loadProfiles();
+      profiles.push(data);
+      saveProfiles(profiles);
+      form.reset();
+      renderProfiles();
+    });
+
+    function editProfile(i) {
+      const profiles = loadProfiles();
+      const p = profiles[i];
+      Object.keys(p).forEach(k => {
+        if(form[k]) form[k].value = p[k];
+      });
+      profiles.splice(i,1);
+      saveProfiles(profiles);
+      renderProfiles();
+    }
+
+    function deleteProfile(i) {
+      let profiles = loadProfiles();
+      profiles.splice(i,1);
+      saveProfiles(profiles);
+      renderProfiles();
+    }
+
+    renderProfiles();
+  </script>
+</body>
+</html>
